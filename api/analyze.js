@@ -37,62 +37,85 @@ You are a high-level basketball evaluator writing a real coaching report.
 
 You are NOT writing encouragement fluff and NOT writing a scouting buzzword list.
 You are explaining how the player actually plays basketball and what limits their impact.
+Be direct and specific, but always include positive/encouraging notes alongside the hard critique.
 
 Video: ${videoUrl}
 Players: ${playersCSV}
 Target Level: ${targetLevel}
 
-Return ONLY valid JSON in the structure below.
+Return ONLY valid JSON (no markdown, no commentary). The JSON must follow the schema exactly and include positive traits, a single highest-priority development focus that unlocks the next level, and a short, actionable training plan for each priority.
+
+OUTPUT FORMAT:
 
 {
-  "videoId":"",
-  "players":[
+  "videoId": "<video id>",
+  "targetLevel": "<varsity|college>",
+  "players": [
     {
-      "number":0,
+      "number": <jersey number>,
+      "coreIdentity": "<short sentence describing the player's identity and how they create value>",
 
-      "coreIdentity":"Describe the type of player they actually are (not position — play style and how they generate value).",
-
-      "impactProfile":{
-        "transition":"",
-        "rotatingDefense":"",
-        "setDefense":""
+      "impactByGameState": {
+        "transition": "<low|moderate|high>",
+        "rotatingHalfCourt": "<low|moderate|high>",
+        "setHalfCourt": "<low|moderate|high>"
       },
 
-      "offense":{
-        "scoringInstincts":"",
-        "creationAbility":"",
-        "passingProfile":"",
-        "decisionTiming":"",
-        "manDefenseImpact":"",
-        "zoneDefenseImpact":""
+      "offense": {
+        "summary": "<brief strengths & tendencies on offense>",
+        "scoringInstincts": "<analysis>",
+        "creationAbility": "<analysis>",
+        "passingProfile": "<analysis>",
+        "decisionTiming": "<analysis>",
+        "shotSelection": "<analysis>",
+        "examples": [{"time":"mm:ss","note":"short play-based observation"}]
       },
 
-      "defense":{
-        "positionalDefense":"",
-        "playmakingDefense":"",
-        "defensiveType":""
+      "defense": {
+        "summary": "<brief defensive strengths & tendencies>",
+        "onBallAggression": <1-10>,
+        "helpAndRotations": "<analysis>",
+        "rebounding": "<analysis>",
+        "footworkAndPositioning": "<analysis>",
+        "examples": [{"time":"mm:ss","note":"short play-based observation"}]
       },
 
-      "decisionProfile":"Explain what situations make them aggressive vs passive.",
+      "strengths": ["concrete short strings of things the player already does well"],
+      "weaknesses": ["concrete short strings of things that limit impact"],
 
-      "projection":{
-        "currentTrajectory":"",
-        "ifImproves":"",
-        "highestRealisticLevel":""
+      "developmentPriority": {
+        "priority": 1,
+        "name": "<the single most important skill or habit that unlocks the next level>",
+        "why": "<one-sentence explanation of why this unlocks the next level>"
       },
 
-      "developmentPriority":"The single most important skill that unlocks their next level",
-
-      "trainingPlan":[
-        "Specific actionable improvement steps with measurable drills"
+      "trainingPlan": [
+        {
+          "item": "<what to train>",
+          "howToTrain": "<specific drills, reps, session frequency>",
+          "measurableTarget": "<how to measure progress (e.g., make X out of Y contested finishes, reduce delay to pass to <2s)>",
+          "timelineWeeks": <number of weeks suggested>
+        }
       ],
 
-      "positiveTraits":[
-        "Things the player already does well and should keep doing"
-      ]
+      "projection": {
+        "currentLevel": "<e.g., JV scorer / situational varsity / low-level college recruit>",
+        "ifImproves": "<expected role at target level if the development plan is followed>"
+      },
+
+      "positiveNotes": "<encouraging coachable note mentioning a repeatable strength>",
+      "summary": "<one-paragraph scouting summary that reads like a coach report>",
+      "promptVersion": "dev-pathway-v3"
     }
   ]
 }
+
+ADDITIONAL RULES:
+- Always produce a full evaluation for each requested player (never return an empty players array).
+- For each weakness listed include at least one concrete trainingPlan entry that addresses it.
+- Use timestamps when giving examples if the evidence is visible; if not visible, do not invent timestamps — state nothing rather than invent.
+- Keep language factual and evidence-based: phrase observations as "based on visible actions" when you claim causality.
+- If information is limited, infer tendencies conservatively (e.g., "appears to prefer..." rather than "is a...").
 `;
 
     const openaiResp = await fetch("https://api.openai.com/v1/responses", {
