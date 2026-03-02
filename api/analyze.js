@@ -127,7 +127,7 @@ ADDITIONAL RULES:
       body: JSON.stringify({
   model: "gpt-5.2",
   input: prompt,
-  max_output_tokens: 1500,
+  max_output_tokens: 3000,
   temperature: 0,
   top_p: 1.0
       }),
