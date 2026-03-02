@@ -2,7 +2,18 @@
 // Minimal Vercel serverless that proxies a prompt to OpenAI Responses API.
 // Returns the model's JSON output as-is (expects the model to return JSON).
 
-export default async function handler(req, res) {
+// Allow browser requests (CORS)
+const allowCors = fn => async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+  return fn(req, res);
+};
+async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Method Not Allowed - POST only" });
@@ -83,3 +94,4 @@ Return ONLY valid JSON following this schema:
     return res.status(500).json({ error: err.message });
   }
 }
+export default allowCors(handler);
