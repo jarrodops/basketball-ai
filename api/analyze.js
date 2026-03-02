@@ -33,28 +33,65 @@ async function handler(req, res) {
 
     const playersCSV = players.join(",");
     const prompt = `
-You are a basketball scouting assistant.
+You are a high-level basketball evaluator writing a real coaching report.
+
+You are NOT writing encouragement fluff and NOT writing a scouting buzzword list.
+You are explaining how the player actually plays basketball and what limits their impact.
+
 Video: ${videoUrl}
 Players: ${playersCSV}
+Target Level: ${targetLevel}
 
-Return ONLY valid JSON following this schema:
+Return ONLY valid JSON in the structure below.
 
 {
-  "videoId": "<youtube id>",
-  "players": [
+  "videoId":"",
+  "players":[
     {
-      "number": <integer>,
-      "summary": "<1-2 sentence summary>",
-      "strengths": ["..."],
-      "weaknesses": ["..."],
-      "iq": <1-10>,
-      "athleticism": <1-10>,
-      "motor": <1-10>,
-      "coachability": <1-10>,
-      "examples":[{"time":"mm:ss","note":"short note referencing visible play"}]
+      "number":0,
+
+      "coreIdentity":"Describe the type of player they actually are (not position — play style and how they generate value).",
+
+      "impactProfile":{
+        "transition":"",
+        "rotatingDefense":"",
+        "setDefense":""
+      },
+
+      "offense":{
+        "scoringInstincts":"",
+        "creationAbility":"",
+        "passingProfile":"",
+        "decisionTiming":"",
+        "manDefenseImpact":"",
+        "zoneDefenseImpact":""
+      },
+
+      "defense":{
+        "positionalDefense":"",
+        "playmakingDefense":"",
+        "defensiveType":""
+      },
+
+      "decisionProfile":"Explain what situations make them aggressive vs passive.",
+
+      "projection":{
+        "currentTrajectory":"",
+        "ifImproves":"",
+        "highestRealisticLevel":""
+      },
+
+      "developmentPriority":"The single most important skill that unlocks their next level",
+
+      "trainingPlan":[
+        "Specific actionable improvement steps with measurable drills"
+      ],
+
+      "positiveTraits":[
+        "Things the player already does well and should keep doing"
+      ]
     }
-  ],
-  "promptVersion": "mvp-v1"
+  ]
 }
 `;
 
