@@ -125,10 +125,11 @@ ADDITIONAL RULES:
         "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: "gpt-5.2",
-        input: prompt,
-        max_output_tokens: 800,
-        temperature: 0
+  model: "gpt-5.2",
+  input: prompt,
+  max_output_tokens: 1500,
+  temperature: 0,
+  top_p: 1.0
       }),
     });
 
