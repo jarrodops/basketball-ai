@@ -20,7 +20,7 @@ async function handler(req, res) {
   }
 
   try {
-    const { videoUrl, players } = req.body ?? {};
+    const { videoUrl, players, targetLevel } = req.body ?? {};
 
     if (!videoUrl || !Array.isArray(players) || players.length === 0) {
       return res.status(400).json({ error: "Missing required fields: videoUrl, players" });
