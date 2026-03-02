@@ -104,7 +104,8 @@ Return ONLY valid JSON in the structure below.
       body: JSON.stringify({
         model: "gpt-5.2",
         input: prompt,
-        max_output_tokens: 800
+        max_output_tokens: 800,
+        temperature: 0
       }),
     });
 
@@ -115,18 +116,49 @@ Return ONLY valid JSON in the structure below.
 
     const data = await openaiResp.json();
 
-    const text =
-      data.output_text ||
-      (data.output && data.output[0] && (data.output[0].content?.[0]?.text ?? data.output[0].content)) ||
-      JSON.stringify(data);
+const text =
+  data.output_text ||
+  (data.output && data.output[0] && (data.output[0].content?.[0]?.text ?? data.output[0].content)) ||
+  JSON.stringify(data);
 
-    try {
-      const parsed = JSON.parse(typeof text === "string" ? text.trim() : text);
-      res.setHeader("Content-Type", "application/json");
-      return res.status(200).json(parsed);
-    } catch (parseErr) {
-      return res.status(200).json({ raw: text, warning: "Failed to parse model output as JSON" });
+// Try direct parse first
+try {
+  const parsed = JSON.parse(typeof text === "string" ? text.trim() : text);
+  res.setHeader("Content-Type", "application/json");
+  return res.status(200).json(parsed);
+} catch (directErr) {
+  // If direct parse fails, attempt to extract a JSON substring from the text
+  if (typeof text === "string") {
+    // Find the first "{" and the last "}" and try to parse the slice.
+    const first = text.indexOf("{");
+    const last = text.lastIndexOf("}");
+    if (first !== -1 && last !== -1 && last > first) {
+      const candidate = text.slice(first, last + 1).trim();
+      try {
+        const parsed = JSON.parse(candidate);
+        res.setHeader("Content-Type", "application/json");
+        return res.status(200).json(parsed);
+      } catch (sliceErr) {
+        // fall through to returning raw
+      }
     }
+
+    // As a last-ditch attempt, try to find the first balanced JSON-like object using regex
+    const match = text.match(/\{[\s\S]*\}/);
+    if (match && match[0]) {
+      try {
+        const parsed = JSON.parse(match[0]);
+        res.setHeader("Content-Type", "application/json");
+        return res.status(200).json(parsed);
+      } catch (regexErr) {
+        // fall through
+      }
+    }
+  }
+
+  // If we get here, parsing failed — return raw text for debugging
+  return res.status(200).json({ raw: text, warning: "Failed to parse model output as JSON" });
+}
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
